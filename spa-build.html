@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Intercom - Instant Push-to-Talk for macOS</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Instant Push-to-Talk for macOS. The walkie-talkie for local teams to collaborate seamlessly.">
+    <link rel="canonical" href="https://officeintercom.app/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://officeintercom.app/">
+    <meta property="og:title" content="Office Intercom - Instant Push-to-Talk for macOS">
+    <meta property="og:description" content="Instant Push-to-Talk for macOS. The walkie-talkie for local teams to collaborate seamlessly.">
+    <meta property="og:image" content="https://officeintercom.app/assets/logo.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://officeintercom.app/">
+    <meta property="twitter:title" content="Office Intercom - Instant Push-to-Talk for macOS">
+    <meta property="twitter:description" content="Instant Push-to-Talk for macOS. The walkie-talkie for local teams to collaborate seamlessly.">
+    <meta property="twitter:image" content="https://officeintercom.app/assets/logo.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+/* --- Design Tokens --- */
+:root {
+    --bg-main: #0B0E14;
+    --bg-alt: #131720;
+    --surface: rgba(255, 255, 255, 0.03);
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --surface-border: rgba(255, 255, 255, 0.08);
+    
+    /* Neon Blue from the logo */
+    --primary: #00E5FF;
+    --primary-glow: rgba(0, 229, 255, 0.4);
+    --primary-hover: #33EBFF;
+    
+    --text-main: #F8F9FA;
+    --text-muted: #9BA3AF;
+    
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* --- Reset & Base --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* --- Utilities --- */
+.glass {
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--surface-border);
+    border-radius: 16px;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #fff, var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-alt {
+    background: linear-gradient(135deg, var(--bg-main) 0%, #0c151e 50%, var(--bg-alt) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-alt::before {
+    content: '';
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: radial-gradient(circle at 80% 20%, rgba(0, 229, 255, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.section {
+    padding: 100px 0;
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-family: var(--font-sans);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+/* --- Navigation --- */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: rgba(11, 14, 20, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--surface-border);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.nav-logo {
+    height: 56px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.nav-link:hover {
+    color: var(--primary);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1000;
+}
+
+/* --- Hero Section --- */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-container {
+    display: grid;
+    grid-template-columns: minmax(auto, calc(1200px / 2 - 32px)) 1fr;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    max-width: none;
+    width: 100%;
+    padding-left: max(24px, calc((100vw - 1200px) / 2));
+    padding-right: 24px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(0, 229, 255, 0.1);
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    max-width: 480px;
+}
+
+.hero-cta-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cta-note {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Interactive PTT Button */
+.btn-interactive {
+    background: var(--surface);
+    color: var(--text-main);
+    border: 1px solid var(--surface-border);
+    padding: 16px 32px;
+    border-radius: 32px;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: visible;
+}
+
+.btn-interactive:hover {
+    background: var(--surface-hover);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.btn-interactive:active, .btn-interactive.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    transform: scale(0.96);
+}
+
+.wave-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.btn-interactive.active .wave-ring {
+    animation: ripple 1.5s linear infinite;
+}
+
+.btn-interactive.active .ring-1 { animation-delay: 0s; }
+.btn-interactive.active .ring-2 { animation-delay: 0.5s; }
+.btn-interactive.active .ring-3 { animation-delay: 1s; }
+
+@keyframes ripple {
+    0% {
+        width: 100%;
+        height: 100%;
+        opacity: 0.8;
+    }
+    100% {
+        width: 250%;
+        height: 250%;
+        opacity: 0;
+    }
+}
+
+/* Hero Background Glow */
+.hero-bg-glow {
+    position: absolute;
+    top: 50%;
+    right: 10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    transform: translateY(-50%);
+    z-index: 1;
+    filter: blur(60px);
+    pointer-events: none;
+}
+
+/* Mockup */
+.app-mockup {
+    padding: 24px;
+    border-radius: 20px;
+    background: rgba(18, 22, 31, 0.6);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    position: relative;
+}
+
+.mockup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.mockup-logo {
+    height: 16px;
+}
+
+.mockup-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.mockup-status::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: #4CAF50;
+    border-radius: 50%;
+}
+
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    border-radius: 16px;
+    width: 160px;
+    margin: 0 auto;
+    position: relative;
+    transition: var(--transition);
+}
+
+.user-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.15);
+}
+
+.avatar {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background: #4CAF50;
+    border: 2px solid var(--bg-alt);
+    border-radius: 50%;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+}
+
+.hotkey {
+    background: rgba(255,255,255,0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.mock-call-btn {
+    position: absolute;
+    bottom: -16px;
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px var(--primary-glow);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: var(--transition);
+}
+
+.user-card:hover .mock-call-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Sections --- */
+.section-header {
+    text-align: center;
+    margin-bottom: 64px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.section-subtitle {
+    font-size: 1.125rem;
+    color: var(--text-muted);
+}
+
+/* --- Hero Screenshot --- */
+.hero-visual {
+    height: calc(100vh - 160px);
+    min-height: 400px;
+    max-height: 800px;
+    overflow: hidden;
+    position: relative;
+    mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    padding-bottom: 20px;
+}
+
+.hero-image-wrapper {
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(18, 22, 31, 0.6);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    transform-style: preserve-3d;
+    transition: transform 0.1s linear;
+    will-change: transform;
+    backface-visibility: hidden;
+}
+.hero-screenshot {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+}
+/* --- Interactive UI Grid --- */
+.full-bleed-grid {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.app-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.app-section-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+.app-section-header .badge {
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 100px;
+    color: var(--text-muted);
+}
+
+/* --- Users Grid & Cards --- */
+.users-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    min-height: 20px; /* So it's valid as a drop target when empty */
+}
+
+.user-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.user-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.user-card.in-call-active {
+    border-color: rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.2), 0 8px 24px rgba(0, 229, 255, 0.1);
+    background: rgba(0, 229, 255, 0.05);
+}
+
+.user-card.sortable-ghost {
+    opacity: 0.4;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.user-card.sortable-drag {
+    cursor: grabbing !important;
+    opacity: 0.9;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+    transform: scale(1.05);
+}
+
+.avatar-wrapper {
+    position: relative;
+}
+
+/* In-call ring around avatar wrapper */
+.avatar-wrapper.in-call::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
+    animation: in-call-spin 3s linear infinite;
+    pointer-events: none;
+    background: conic-gradient(var(--primary) 0deg, transparent 120deg, transparent 360deg);
+    mask: radial-gradient(circle, transparent calc(100% - 2px), black calc(100% - 2px));
+    -webkit-mask: radial-gradient(circle, transparent calc(100% - 2px), black calc(100% - 2px));
+}
+
+@keyframes in-call-spin { to { transform: rotate(360deg); } }
+
+.user-avatar-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #2a2a2a;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3px solid #1a1e27;
+}
+.status-dot.online { background: #27C93F; }
+.status-dot.offline { background: #666; }
+
+.user-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.pin-btn {
+    position: absolute;
+    top: 6px; 
+    left: 6px;
+    background: transparent; 
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+    padding: 4px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+.pin-btn.pinned { opacity: 1; color: var(--primary); }
+.user-card:hover .pin-btn { opacity: 1; }
+.pin-btn:hover { color: var(--text-main); }
+.pin-btn.pinned:hover { color: var(--primary-hover); }
+
+.drag-handle {
+    position: absolute;
+    top: 6px; 
+    right: 6px;
+    color: var(--text-muted);
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+    padding: 4px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+.user-card:hover .drag-handle { opacity: 1; }
+.drag-handle:hover { color: var(--text-main); }
+.drag-handle:active { cursor: grabbing; }
+
+/* ── User Actions & Buttons ─────────────────────────────────────────────── */
+.user-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.hotkey-btn {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    width: 32px; 
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.hotkey-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-main);
+}
+
+.call-btn {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    width: 32px; 
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+    transform: scale(0.8) translateY(4px);
+    padding: 0;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main);
+}
+
+.call-btn.call-start:hover {
+    background: #27C93F;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(39, 201, 63, 0.4);
+}
+
+.call-btn.call-end {
+    background: #FF3B30;
+    color: #fff;
+    opacity: 1; /* Always show hangup button when active */
+    transform: scale(1) translateY(0);
+}
+
+.call-btn.call-end:hover {
+    box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
+}
+
+.hotkey-btn .material-icons,
+.call-btn .material-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.user-card:hover .call-btn {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.call-btn.call-start {
+    background: linear-gradient(135deg, #0077ff, var(--primary));
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.4);
+}
+
+.call-btn.call-start:hover { 
+    transform: scale(1.1) !important; 
+    box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5); 
+}
+
+.call-btn.call-end {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.call-btn.call-end:hover { 
+    background: rgba(239,68,68,0.35); 
+}
+
+/* --- Comparison Table --- */
+.comparison-container {
+    overflow-x: auto;
+    border-radius: 16px;
+    padding: 32px;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.comparison-table th, .comparison-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.comparison-table th {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.comparison-table td {
+    color: var(--text-muted);
+}
+
+.highlight-col {
+    background: rgba(0, 229, 255, 0.05);
+    border-left: 1px solid var(--primary);
+    border-right: 1px solid var(--primary);
+}
+
+.comparison-table thead .highlight-col {
+    color: var(--primary);
+    border-top: 1px solid var(--primary);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.comparison-table tbody tr:last-child .highlight-col {
+    border-bottom: 1px solid var(--primary);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.comparison-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.material-icons {
+    vertical-align: middle;
+    margin-right: 8px;
+    font-size: 1.25rem;
+}
+
+.check-icon {
+    color: var(--primary);
+}
+
+.cross-icon {
+    color: #FF5252;
+}
+
+.use-case-icon {
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+/* --- Use Cases --- */
+.use-cases-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    position: relative;
+    z-index: 2;
+}
+
+.use-case {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid var(--surface-border);
+    transition: var(--transition);
+}
+
+.use-case:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.use-case h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+}
+
+.use-case p {
+    color: var(--text-muted);
+}
+
+/* --- Footer --- */
+.footer {
+    border-top: 1px solid var(--surface-border);
+    padding: 64px 0 32px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 64px;
+}
+
+.footer-logo {
+    height: 32px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+.footer-desc {
+    color: var(--text-muted);
+    max-width: 250px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 32px;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: var(--text-main);
+}
+
+.footer-bottom {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    padding-top: 32px;
+    border-top: 1px solid var(--surface-border);
+}
+
+/* --- Reveal Animations --- */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+
+/* --- Pricing --- */
+.pricing-hero {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 120px;
+    padding-bottom: 80px;
+}
+
+.pricing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    perspective: 1000px;
+}
+
+.pricing-card {
+    background: rgba(18, 22, 31, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.pricing-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.pricing-card.active-plan {
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.05);
+}
+
+.pricing-card-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.seats-text {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.price-container {
+    text-align: left;
+    margin-top: 8px;
+}
+
+.price-amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.price-period {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.pricing-btn {
+    padding: 8px 24px;
+    font-size: 0.875rem;
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    box-shadow: none;
+    cursor: default;
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.15);
+    transform: none;
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .hero-visual {
+        display: none;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-subtitle {
+        margin: 0 auto 40px;
+    }
+    
+    .hero-cta-group {
+        justify-content: center;
+    }
+    
+    .hero-bg-glow {
+        right: 50%;
+        transform: translate(50%, -50%);
+    }
+    
+    .comparison-table th, .comparison-table td {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .use-cases-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: rgba(11, 14, 20, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 24px;
+        border-bottom: 1px solid var(--surface-border);
+        align-items: stretch;
+        text-align: center;
+        gap: 24px;
+    }
+
+    .nav-links.mobile-menu-open {
+        display: flex;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .footer-container {
+        flex-direction: column;
+        gap: 32px;
+    }
+    
+    .pricing-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 16px;
+    }
+    
+    .price-container {
+        text-align: center;
+    }
+}
+
+/* --- INLINE CSS FROM PAGES --- */
+
+.policy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-top: 120px;
+            padding-bottom: 80px;
+        }
+        
+        .policy-content {
+            background: rgba(18, 22, 31, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 48px;
+            color: var(--text-main);
+        }
+        
+        @media (max-width: 768px) {
+            .policy-container {
+                padding-top: 80px;
+                padding-bottom: 40px;
+            }
+            .policy-content {
+                padding: 24px;
+            }
+        }
+
+        .faq-item {
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .faq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            padding: 20px 24px;
+            cursor: pointer;
+            list-style: none; /* Hide default triangle */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        /* Hide default details marker in Webkit/Safari */
+        .faq-question::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-question:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--primary);
+        }
+
+        .faq-question-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .faq-question-title .material-icons {
+            color: var(--primary);
+            opacity: 0.9;
+            font-size: 1.4rem;
+        }
+
+        .chevron {
+            color: var(--text-muted);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        details[open] .chevron {
+            transform: rotate(180deg);
+        }
+        
+        details[open] .faq-question {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+        }
+
+        .faq-answer {
+            color: var(--text-muted);
+            line-height: 1.6;
+            padding: 20px 24px 24px 64px; /* Indent slightly to align with text */
+            font-size: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .faq-answer strong {
+            color: #fff;
+        }
+.policy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-top: 120px;
+            padding-bottom: 80px;
+        }
+        
+        .policy-content {
+            background: rgba(18, 22, 31, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 48px;
+            color: var(--text-main);
+        }
+        
+        @media (max-width: 768px) {
+            .policy-container {
+                padding-top: 80px;
+                padding-bottom: 40px;
+            }
+            .policy-content {
+                padding: 24px;
+            }
+        }
+
+        .policy-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .policy-content h2 {
+            font-size: 1.5rem;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .policy-content p {
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .policy-content strong {
+            color: #fff;
+        }
+        
+        .policy-content ul {
+            list-style-type: disc;
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+        
+        .policy-content li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .policy-content .last-updated {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 32px;
+        }
+.waitlist-container {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px 80px;
+            position: relative;
+        }
+        
+        .waitlist-card {
+            background: rgba(18, 22, 31, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @media (max-width: 768px) {
+            .waitlist-container {
+                padding: 80px 16px 40px;
+            }
+            .waitlist-card {
+                padding: 32px 24px;
+            }
+        }
+
+        .waitlist-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .waitlist-card h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+
+        .waitlist-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 32px;
+            font-size: 1.1rem;
+        }
+
+        .waitlist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-left: 4px;
+        }
+
+        .form-control {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+        }
+
+        .submit-btn {
+            margin-top: 16px;
+            padding: 16px;
+            font-size: 1.1rem;
+            width: 100%;
+        }
+
+
+/* SPA specific styles */
+.spa-page {
+    min-height: calc(100vh - 160px);
+    padding-top: 80px; /* offset for fixed nav */
+}
+.spa-page > header.hero {
+    padding-top: 120px;
+    margin-top: -80px;
+}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="brand">
+                <a href="#home">
+                    <img src="assets/logo.png" alt="Office Intercom Logo" class="nav-logo">
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#use-cases" class="nav-link">Use Cases</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="#waitlist" class="btn btn-primary nav-cta">Join Waitlist</a>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <span class="material-icons">menu</span>
+            </button>
+        </div>
+    </nav>
+    
+    <div id="spa-container">
+        <div id="page-home" class="spa-page active"><header class="hero">
+        <div class="container hero-container">
+            <div class="hero-content reveal">
+                <div class="badge">Free To Try</div>
+                <h1 class="hero-title">Instant Team Communication. <br><span class="text-gradient">Zero Friction.</span></h1>
+                <p class="hero-subtitle">Hold a hotkey to instantly broadcast audio to your team. 100% Local. No cloud servers, no latency, no app fatigue. A native macOS tray app built for speed.</p>
+                <div class="hero-cta-group">
+                    <a href="#waitlist" class="btn btn-primary nav-cta">Join Waitlist</a>
+                </div>
+            </div>
+            <div class="hero-visual reveal delay-1" id="interactive-ui">
+                <div class="full-bleed-grid">
+                    <div class="app-section-header">
+                        <h2><span class="material-icons" style="font-size: 1.1rem; vertical-align: bottom;">people</span> People</h2>
+                        <span class="badge">5 online</span>
+                    </div>
+                    
+                    <div id="pinned-users-grid" class="users-grid-container">
+                        <!-- Pinned User -->
+                        <div class="user-card">
+                            <button class="pin-btn pinned"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                            <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                            <div class="avatar-wrapper">
+                                <img src="https://randomuser.me/api/portraits/women/43.jpg" alt="Priya P." class="user-avatar-img">
+                                <span class="status-dot online"></span>
+                            </div>
+                            <span class="user-name">Priya P.</span>
+                            <div class="user-actions">
+                                <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                                <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr id="pinned-separator" style="border: 0; height: 1px; background: var(--surface-border); margin: 16px 0;">
+
+                    <div id="users-grid" class="users-grid-container">
+                        <!-- Unpinned Users -->
+                        <div class="user-card">
+                            <button class="pin-btn"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                            <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                            <div class="avatar-wrapper">
+                                <img src="https://randomuser.me/api/portraits/men/53.jpg" alt="Jamal W." class="user-avatar-img">
+                                <span class="status-dot online"></span>
+                            </div>
+                            <span class="user-name">Jamal W.</span>
+                            <div class="user-actions">
+                                <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                                <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <button class="pin-btn"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                            <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                            <div class="avatar-wrapper">
+                                <img src="https://randomuser.me/api/portraits/women/31.jpg" alt="Mei L." class="user-avatar-img">
+                                <span class="status-dot online"></span>
+                            </div>
+                            <span class="user-name">Mei L.</span>
+                            <div class="user-actions">
+                                <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                                <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <button class="pin-btn"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                            <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                            <div class="avatar-wrapper">
+                                <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="Mateo R." class="user-avatar-img">
+                                <span class="status-dot offline"></span>
+                            </div>
+                            <span class="user-name">Mateo R.</span>
+                            <div class="user-actions">
+                                <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                                <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <button class="pin-btn"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                            <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                            <div class="avatar-wrapper">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah K." class="user-avatar-img">
+                                <span class="status-dot online"></span>
+                            </div>
+                            <span class="user-name">Sarah K.</span>
+                            <div class="user-actions">
+                                <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                                <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <button class="pin-btn"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                            <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                            <div class="avatar-wrapper">
+                                <img src="https://randomuser.me/api/portraits/men/34.jpg" alt="Omar F." class="user-avatar-img">
+                                <span class="status-dot online"></span>
+                            </div>
+                            <span class="user-name">Omar F.</span>
+                            <div class="user-actions">
+                                <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                                <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-glow"></div>
+    </header>
+
+    <section id="features" class="features section">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Built for Speed, Not Chitchat.</h2>
+                <p class="section-subtitle">Why Office Intercom beats general chat apps for operational teams.</p>
+            </div>
+            <div class="comparison-container glass reveal">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th class="highlight-col">Office Intercom</th>
+                            <th>Slack Huddles / General Chat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Setup Friction</td>
+                            <td class="highlight-col"><span class="material-icons check-icon">check_circle</span> Hold a hotkey, talk, release. Instant.</td>
+                            <td><span class="material-icons cross-icon">cancel</span> Click into channel, toggle audio, wait for peers.</td>
+                        </tr>
+                        <tr>
+                            <td>Screen Real Estate</td>
+                            <td class="highlight-col"><span class="material-icons check-icon">check_circle</span> Native macOS tray app, stays out of your way.</td>
+                            <td><span class="material-icons cross-icon">cancel</span> Large main windows that clutter the desktop.</td>
+                        </tr>
+                        <tr>
+                            <td>Resource Usage</td>
+                            <td class="highlight-col"><span class="material-icons check-icon">check_circle</span> Optimized Electron app, low CPU/RAM usage.</td>
+                            <td><span class="material-icons cross-icon">cancel</span> Massive web clients running continuously.</td>
+                        </tr>
+                        <tr>
+                            <td>Cost Structure</td>
+                            <td class="highlight-col"><span class="material-icons check-icon">check_circle</span> Simple flat pricing model.</td>
+                            <td><span class="material-icons cross-icon">cancel</span> Expensive monthly per-user SaaS rates.</td>
+                        </tr>
+                        <tr>
+                            <td>Privacy & Routing</td>
+                            <td class="highlight-col"><span class="material-icons check-icon">check_circle</span> 100% Local (WebRTC). Audio never hits a cloud server.</td>
+                            <td><span class="material-icons cross-icon">cancel</span> Cloud-based routing, subject to external server latency.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="use-cases" class="use-cases section bg-alt">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Who is this for?</h2>
+                <p class="section-subtitle">Perfect for high-speed, operational environments where typing is too slow.</p>
+            </div>
+            <div class="use-cases-grid">
+                <div class="use-case reveal">
+                    <h3><span class="material-icons use-case-icon">palette</span> Creative Teams</h3>
+                    <p>Video editors, UI designers, or developers working synchronously who want to ask a quick question without launching a full Zoom call or opening a Slack Huddle.</p>
+                </div>
+                <div class="use-case reveal delay-1">
+                    <h3><span class="material-icons use-case-icon">local_shipping</span> Operations & Dispatch</h3>
+                    <p>Logistics coordinators, property managers, or event production staff on Macs who need instant "walkie-talkie" style communication with onsite teams.</p>
+                </div>
+                <div class="use-case reveal delay-2">
+                    <h3><span class="material-icons use-case-icon">storefront</span> Boutique Agencies</h3>
+                    <p>Small agencies (5–20 people) looking for a "virtual room" presence where holding a hotkey broadcasts instant audio to a peer's speaker.</p>
+                </div>
+                <div class="use-case reveal delay-3">
+                    <h3><span class="material-icons use-case-icon">local_hospital</span> Front-Desk Staff</h3>
+                    <p>Administrative staff in medical/dental practices using Macs who need a discrete, instant push-to-talk channel to internal office rooms.</p>
+                </div>
+            </div>
+        </div>
+    </section></div>
+        <div id="page-pricing" class="spa-page" style="display:none;"><header class="hero pricing-hero">
+        <div class="container">
+            <div class="section-header reveal" style="margin-bottom: 32px;">
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 16px;">Simple, <span class="text-gradient">Flat Pricing</span></h1>
+                <p class="section-subtitle">Choose a plan that fits your team's size. Your tier limits the number of users that can connect to your host at the same time.</p>
+            </div>
+            
+            <div class="pricing-grid reveal delay-1">
+                <!-- Small Team -->
+                <div class="pricing-card active-plan">
+                    <div class="pricing-card-header">
+                        <div>
+                            <h3>Small Team</h3>
+                            <p class="seats-text">Up to 10 Seats</p>
+                        </div>
+                        <div class="price-container">
+                            <span class="price-amount text-gradient">$2.99</span>
+                            <span class="price-period">/ mo</span>
+                        </div>
+                    </div>
+                    <a href="#waitlist" class="btn btn-primary pricing-btn" style="text-decoration: none; text-align: center;">Select</a>
+                </div>
+
+                <!-- Medium Team -->
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div>
+                            <h3>Medium Team</h3>
+                            <p class="seats-text">10 to 50 Seats</p>
+                        </div>
+                        <div class="price-container">
+                            <span class="price-amount text-gradient">$9.99</span>
+                            <span class="price-period">/ mo</span>
+                        </div>
+                    </div>
+                    <a href="#waitlist" class="btn btn-primary pricing-btn" style="text-decoration: none; text-align: center;">Select</a>
+                </div>
+
+                <!-- Large Team -->
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div>
+                            <h3>Large Team</h3>
+                            <p class="seats-text">50+ Seats</p>
+                        </div>
+                        <div class="price-container">
+                            <span class="price-amount text-gradient">$24.99</span>
+                            <span class="price-period">/ mo</span>
+                        </div>
+                    </div>
+                    <a href="#waitlist" class="btn btn-primary pricing-btn" style="text-decoration: none; text-align: center;">Select</a>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-glow" style="right: 50%; top: 30%; transform: translateX(50%);"></div>
+    </header></div>
+        <div id="page-faq" class="spa-page" style="display:none;"><main class="policy-container reveal">
+        <div class="policy-content">
+            <div class="section-header" style="text-align: left; margin-bottom: 48px; max-width: 100%; margin-left: 0;">
+                <h1 class="hero-title" style="font-size: 3.5rem; margin-bottom: 16px; text-align: left;">Frequently Asked <br><span class="text-gradient">Questions</span></h1>
+            </div>
+
+            <details class="faq-item" open>
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">help_outline</span>
+                        What is Office Intercom?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    Office Intercom is a lightning-fast, native macOS tray application designed to bring the friction-less communication of a physical walkie-talkie right to your Mac. Just hold your custom hotkey to instantly broadcast your voice to your team.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">wifi_off</span>
+                        Do I need an internet connection to use it?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    No! Office Intercom operates 100% locally on your network. As long as you and your team are on the same local area network (LAN) or WiFi, you can communicate instantly.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">lock</span>
+                        Are my conversations private?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    Absolutely. Because Office Intercom is fully decentralized, there are no cloud servers involved. Audio streams are sent directly peer-to-peer over your local network. Your voice is never recorded, stored, or transmitted over the public internet.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">computer</span>
+                        Is it available for Windows or Linux?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    Currently, Office Intercom is built exclusively for macOS to provide a deeply integrated, native-feeling, and lightweight tray experience.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">people_alt</span>
+                        How do I connect with my team?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    It's completely automatic. Once you launch the app, it will automatically discover and display other users on your local network. There are no accounts to create, servers to configure, or links to share.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">speed</span>
+                        Is it a heavy Electron app that will drain my battery?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    While Office Intercom is built on the Electron framework to ensure rapid feature development and stability, it has been deeply engineered and optimized to feel and perform like a lightweight native macOS application. It sleeps gracefully in the background and only uses resources when you're actively broadcasting or receiving audio.
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-question">
+                    <div class="faq-question-title">
+                        <span class="material-icons">snooze</span>
+                        What if I step away from my desk?
+                    </div>
+                    <span class="material-icons chevron">expand_more</span>
+                </summary>
+                <div class="faq-answer">
+                    Office Intercom will automatically show you as "Offline" when you close the app or disconnect from the network, so your team always knows who is available to chat.
+                </div>
+            </details>
+
+        </div>
+        
+        <!-- Background Glow matching the rest of the site -->
+        <div class="hero-bg-glow" style="right: 50%; top: 30%; transform: translateX(50%); opacity: 0.5;"></div>
+    </main></div>
+        <div id="page-privacy" class="spa-page" style="display:none;"><main class="policy-container reveal">
+        <div class="policy-content">
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last Updated: August 12, 2026</p>
+
+            <p>Office Intercom ("we," "our," or "us") respects your privacy and is committed to protecting the personal data of our users ("you" or "user"). This Privacy Policy explains how information is collected, used, and safeguarded when you use our macOS application, Office Intercom (the "App").</p>
+
+            <p>By using the App, you agree to the collection and use of information in accordance with this Privacy Policy.</p>
+
+            <h2>Information We Collect</h2>
+            <p>We collect only the minimum necessary information required to operate the intercom features effectively.</p>
+            <ul>
+                <li><strong>Authentication Data:</strong> Username, email address, or account identifiers used to log in and connect you with team members.</li>
+                <li><strong>Stored Credentials:</strong> Login tokens are stored locally on your device using macOS native secure storage (<code>safeStorage</code> / Keychain). We do not store plain-text passwords on your local device.</li>
+                <li><strong>Microphone Permissions:</strong> The App requests permission to access your Mac's microphone solely to transmit real-time voice audio when you press to talk or initiate an intercom session.</li>
+                <li><strong>Audio Data:</strong> Voice data is transmitted live to facilitate real-time communication between active users. <strong>We do not record, store, or monitor your audio transmissions on our servers.</strong></li>
+                <li><strong>Device Identifiers:</strong> Basic device metadata (macOS version, app version) used solely to maintain network connection stability and troubleshoot technical issues.</li>
+            </ul>
+
+            <h2>How We Use Your Information</h2>
+            <p>We use the collected data strictly for the following purposes:</p>
+            <ul>
+                <li>To authenticate your identity and allow you to log in.</li>
+                <li>To route real-time peer-to-peer or server-mediated audio calls between you and your designated team members.</li>
+                <li>To remember your active session locally so you do not need to log in each time you open the App.</li>
+            </ul>
+
+            <h2>Data Sharing and Disclosure</h2>
+            <p>We do not sell, rent, or trade your personal information or audio data to third parties. We do not use your data for advertising or tracking across third-party websites/apps. We do not share your personal information with third parties except in the following limited circumstances:</p>
+            <ul>
+                <li><strong>Service Providers:</strong> Infrastructure providers (e.g., relay/TURN/STUN servers) necessary to route audio packets, bound by strict confidentiality obligations.</li>
+                <li><strong>Legal Compliance:</strong> If required by law, subpoena, or government authority to protect our rights or user safety.</li>
+            </ul>
+
+            <h2>Data Security</h2>
+            <ul>
+                <li><strong>Local Data Security:</strong> Sensitive session tokens stored on your device are encrypted using macOS system-level encryption (<code>safeStorage</code> via Keychain Access).</li>
+                <li><strong>Network Security:</strong> Real-time audio streams and authentication requests are encrypted in transit using industry-standard protocols (TLS/SRTP).</li>
+                <li><strong>Sandboxing:</strong> Office Intercom runs strictly within the macOS App Sandbox environment enforced by Apple, ensuring the App cannot access unauthorized system files or background hardware without explicit user consent.</li>
+            </ul>
+
+            <h2>Your Choices and Rights</h2>
+            <ul>
+                <li><strong>Microphone Access:</strong> You can revoke or grant microphone permissions at any time via System Settings → Privacy & Security → Microphone on your Mac.</li>
+                <li><strong>Account Deletion / Logout:</strong> Logging out clears stored local credentials from your device's Keychain. You may request account deletion by contacting support.</li>
+            </ul>
+
+            <h2>Contact Us</h2>
+            <p>If you have any questions or concerns regarding this Privacy Policy, please contact us at:</p>
+            <p><strong>Email:</strong> officeintercom.app@gmail.com</p>
+        </div>
+        
+        <!-- Background Glow matching the rest of the site -->
+        <div class="hero-bg-glow" style="right: 50%; top: 30%; transform: translateX(50%); opacity: 0.5;"></div>
+    </main></div>
+        <div id="page-waitlist" class="spa-page" style="display:none;"><main class="waitlist-container reveal">
+        <!-- Background Glow -->
+        <div class="hero-bg-glow" style="right: 50%; top: 50%; transform: translate(50%, -50%); opacity: 0.6;"></div>
+        
+        <div class="waitlist-card">
+            <span class="material-icons waitlist-icon">mark_email_read</span>
+            <h1>Join the Waitlist</h1>
+            <p>Enter your details below to get early access when Office Intercom launches.</p>
+            
+            <form action="https://formspree.io/f/mljrorpy" method="post" class="waitlist-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="Name" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="Email" class="form-control" placeholder="john@example.com" required>
+                </div>
+                <button type="submit" class="btn btn-primary submit-btn">Join Waitlist</button>
+            </form>
+        </div>
+    </main></div>
+    </div>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <img src="assets/logo.png" alt="Office Intercom Logo" class="footer-logo">
+                <p class="footer-desc">Instant push-to-talk for modern macOS teams.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#waitlist">Join Waitlist</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+                <a href="mailto:officeintercom.app@gmail.com">Support</a>
+                <a href="#privacy">Privacy</a>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Office Intercom. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Reveal Animations on Scroll ---
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const revealCallback = (entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                // Optional: Stop observing once revealed
+                observer.unobserve(entry.target);
+            }
+        });
+    };
+
+    const revealOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const revealObserver = new IntersectionObserver(revealCallback, revealOptions);
+
+    revealElements.forEach(el => {
+        revealObserver.observe(el);
+    });
+
+        // Removed 3D Tilt effect as it conflicts with the interactive drag-and-drop grid
+
+        // Dynamic user generation to fill the grid
+        const usersGrid = document.getElementById('users-grid');
+        if (usersGrid) {
+            const mockUsers = [
+                { name: "David T.", img: "men/22.jpg", status: "online" },
+                { name: "Emma R.", img: "women/65.jpg", status: "online" },
+                { name: "Michael C.", img: "men/46.jpg", status: "offline" },
+                { name: "Sophia M.", img: "women/68.jpg", status: "online" },
+                { name: "Lucas K.", img: "men/32.jpg", status: "online" },
+                { name: "Isabella G.", img: "women/44.jpg", status: "offline" },
+                { name: "Ethan H.", img: "men/11.jpg", status: "online" },
+                { name: "Mia L.", img: "women/12.jpg", status: "online" },
+                { name: "Alexander P.", img: "men/33.jpg", status: "offline" },
+                { name: "Charlotte B.", img: "women/22.jpg", status: "online" },
+                { name: "Benjamin N.", img: "men/65.jpg", status: "online" },
+                { name: "Amelia J.", img: "women/34.jpg", status: "online" },
+                { name: "Daniel V.", img: "men/68.jpg", status: "offline" },
+                { name: "Harper D.", img: "women/8.jpg", status: "online" },
+                { name: "Henry M.", img: "men/3.jpg", status: "online" },
+                { name: "Evelyn F.", img: "women/17.jpg", status: "online" }
+            ];
+
+            mockUsers.forEach(u => {
+                const card = document.createElement('div');
+                card.className = 'user-card';
+                card.innerHTML = `
+                    <button class="pin-btn"><span class="material-icons" style="font-size: 16px;">push_pin</span></button>
+                    <div class="drag-handle"><span class="material-icons" style="font-size: 16px;">open_with</span></div>
+                    <div class="avatar-wrapper">
+                        <img src="https://randomuser.me/api/portraits/${u.img}" alt="${u.name}" class="user-avatar-img">
+                        <span class="status-dot ${u.status}"></span>
+                    </div>
+                    <span class="user-name">${u.name}</span>
+                    <div class="user-actions">
+                        <button class="hotkey-btn"><span class="material-icons" style="font-size: 14px;">keyboard</span></button>
+                        <button class="call-btn call-start"><span class="material-icons" style="font-size: 16px;">call</span></button>
+                    </div>
+                `;
+                usersGrid.appendChild(card);
+            });
+            
+            // Update the online count
+            const badge = document.querySelector('.app-section-header .badge');
+            if (badge) {
+                const totalOnline = document.querySelectorAll('.status-dot.online').length;
+                badge.textContent = `${totalOnline} online`;
+            }
+        }
+
+        // Initialize SortableJS
+        if (typeof Sortable !== 'undefined') {
+            const pinnedGrid = document.getElementById('pinned-users-grid');
+            
+            const sortableOptions = {
+                group: 'users',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                handle: '.drag-handle',
+                onEnd: updatePinStatus
+            };
+
+            if (pinnedGrid && usersGrid) {
+                Sortable.create(pinnedGrid, sortableOptions);
+                Sortable.create(usersGrid, sortableOptions);
+            }
+        }
+
+        // Pinning Logic
+        document.addEventListener('click', (e) => {
+            const pinBtn = e.target.closest('.pin-btn');
+            if (pinBtn) {
+                const card = pinBtn.closest('.user-card');
+                const isPinned = pinBtn.classList.contains('pinned');
+                const targetGrid = isPinned ? document.getElementById('users-grid') : document.getElementById('pinned-users-grid');
+                
+                if (targetGrid && card) {
+                    targetGrid.appendChild(card);
+                    if (isPinned) {
+                        pinBtn.classList.remove('pinned');
+                    } else {
+                        pinBtn.classList.add('pinned');
+                    }
+                    updateSeparator();
+                }
+            }
+
+            // Click call button to simulate call
+            const callBtn = e.target.closest('.call-btn');
+            if (callBtn) {
+                const card = callBtn.closest('.user-card');
+                const isEnding = callBtn.classList.contains('call-end');
+                const avatarWrapper = card.querySelector('.avatar-wrapper');
+                
+                // If we are starting a call, hang up everywhere else first
+                if (!isEnding) {
+                    document.querySelectorAll('.user-card').forEach(c => {
+                        c.classList.remove('in-call-active');
+                        const cw = c.querySelector('.avatar-wrapper');
+                        if(cw) cw.classList.remove('in-call');
+                        const cb = c.querySelector('.call-btn');
+                        if(cb) {
+                            cb.classList.remove('call-end');
+                            cb.classList.add('call-start');
+                            cb.innerHTML = '<span class="material-icons" style="font-size: 16px;">call</span>';
+                        }
+                    });
+                    
+                    // Start call on this card
+                    card.classList.add('in-call-active');
+                    if(avatarWrapper) avatarWrapper.classList.add('in-call');
+                    callBtn.classList.remove('call-start');
+                    callBtn.classList.add('call-end');
+                    callBtn.innerHTML = '<span class="material-icons" style="font-size: 16px;">call_end</span>';
+                } else {
+                    // Hang up
+                    card.classList.remove('in-call-active');
+                    if(avatarWrapper) avatarWrapper.classList.remove('in-call');
+                    callBtn.classList.remove('call-end');
+                    callBtn.classList.add('call-start');
+                    callBtn.innerHTML = '<span class="material-icons" style="font-size: 16px;">call</span>';
+                }
+            }
+        });
+
+        function updatePinStatus(evt) {
+            const card = evt.item;
+            const toPinned = evt.to.id === 'pinned-users-grid';
+            const pinBtn = card.querySelector('.pin-btn');
+            
+            if (pinBtn) {
+                if (toPinned) {
+                    pinBtn.classList.add('pinned');
+                } else {
+                    pinBtn.classList.remove('pinned');
+                }
+            }
+            updateSeparator();
+        }
+
+        function updateSeparator() {
+            const pinnedGrid = document.getElementById('pinned-users-grid');
+            const sep = document.getElementById('pinned-separator');
+            if (pinnedGrid && sep) {
+                if (pinnedGrid.children.length > 0) {
+                    sep.style.display = 'block';
+                } else {
+                    sep.style.display = 'none';
+                }
+            }
+        }
+        
+        updateSeparator();
+        
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (mobileMenuToggle && navLinks) {
+            mobileMenuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('mobile-menu-open');
+                const icon = mobileMenuToggle.querySelector('.material-icons');
+                if (navLinks.classList.contains('mobile-menu-open')) {
+                    icon.textContent = 'close';
+                } else {
+                    icon.textContent = 'menu';
+                }
+            });
+            
+            // Close mobile menu when a link is clicked
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('mobile-menu-open');
+                    const icon = mobileMenuToggle.querySelector('.material-icons');
+                    if (icon) icon.textContent = 'menu';
+                });
+            });
+        }
+});
+
+
+// SPA Router Logic
+function handleRouting() {
+    const hash = window.location.hash || '#home';
+    const pageId = 'page-' + hash.substring(1);
+    
+    // Hide all pages
+    document.querySelectorAll('.spa-page').forEach(page => {
+        page.style.display = 'none';
+        page.classList.remove('active');
+    });
+    
+    // Show target page
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+        // Small timeout to allow display:block to apply before adding active class for animations
+        setTimeout(() => {
+            targetPage.classList.add('active');
+            window.scrollTo(0,0);
+        }, 10);
+    } else {
+        // Fallback to home
+        document.getElementById('page-home').style.display = 'block';
+        setTimeout(() => document.getElementById('page-home').classList.add('active'), 10);
+    }
+}
+
+window.addEventListener('hashchange', handleRouting);
+document.addEventListener('DOMContentLoaded', handleRouting);
+
+    </script>
+</body>
+</html>
